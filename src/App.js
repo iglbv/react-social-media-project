@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import './styles/App.css'
 import PostList from "./components/PostList";
 import PostForm from "./components/PostForm";
@@ -8,19 +9,24 @@ import MyButton from "./components/UI/button/MyButton";
 import { usePosts } from "./hooks/usePosts";
 
 function App() {
-  const [posts, setPosts] = useState([
-    { id: 1, title: 'Javascript', body: 'Description' },
-    { id: 2, title: 'Javascript 2', body: 'Description' },
-    { id: 3, title: 'Javascript 3', body: 'Description' }
-  ])
+  const [posts, setPosts] = useState([])
 
   const [filter, setFilter] = useState({ sort: '', query: '' })
   const [modal, setModal] = useState(false);
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
+  useEffect(() => {
+    fetchPosts()
+  }, [filter])
+
   function createPost(newPost) {
     setPosts([...posts, newPost])
     setModal(false)
+  }
+
+  async function fetchPosts() {
+    const response = await axios.get('https://jsonplaceholder.typicode.com/posts')
+    setPosts(response.data)
   }
 
   function removePost(post) {
@@ -29,6 +35,7 @@ function App() {
 
   return (
     <div className="App">
+      <MyButton onClick={fetchPosts}>GET POSTS</MyButton>
       <MyButton style={{ marginTop: 30 }} onClick={() => setModal(true)}>
         Создать пользователя
       </MyButton>
